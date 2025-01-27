@@ -58,9 +58,9 @@ export MAMBA_ROOT_PREFIX=$WORK/.micromamba
 cd $WORK
 ```
 
-## Quality Control
+## <code style="color : lightskyblue">Quality Control</code>
 
-Here we used `fastqc` to evaluate the quality of the raw paired-end short reads. This step is crucial to identify potential issues with our sequences. Such issues might be low base calling, contamination by adapter sequences and over-represented k-mers, GC content biases, etc. By using `fastqc`, we will know what we need to trim, and remove from our reads.
+Here we used <code style="color : lightskyblue">fastqc</code> to evaluate the quality of the raw paired-end short reads. This step is crucial to identify potential issues with our sequences. Such issues might be low base calling, contamination by adapter sequences and over-represented k-mers, GC content biases, etc. By using <code style="color : lightskyblue">fastqc</code>, we will know what we need to trim, and remove from our reads.
 
 ```bash
 # Quality Control of R1 and R2 Raw Reads
@@ -77,7 +77,7 @@ Here you can see the quality check results of the short reads.
 ### Quality of Raw Read R2
 ![Image](./resources/R2qualityraw.png)
 
-Then I used `fastp` to clean short reads. `fastp` filters out low quality reads based on phred score, removes poor-quality bases from ends of reads, and remove adapter sequences which were detected during initial `fastqc` report. In our sequences, we did not find any kind of adapter contamination.
+Then I used <code style="color : lightskyblue">fastp</code> to clean short reads. <code style="color : lightskyblue">fastp</code> filters out low quality reads based on phred score, removes poor-quality bases from ends of reads, and remove adapter sequences which were detected during initial <code style="color : lightskyblue">fastqc</code> report. In our sequences, we did not find any kind of adapter contamination.
 
 ```bash
 # Quality Trimming and Cleaning of R1 and R2 Raw Reads
@@ -96,7 +96,7 @@ for file in ./short_reads_processed/clean_reads/*.gz; do
     fastqc $file -o ./short_reads_processed/short_reads_qc -t 32;
 done
 ```
-Here you can see the `fastqc` result after our cleaning and trimming process
+Here you can see the <code style="color : lightskyblue">fastqc</code> result after our cleaning and trimming process
 
 ### Quality of Cleaned Read R1
 ![Image](./resources/R1Cleanquality.png)
@@ -140,7 +140,7 @@ bases trimmed due to adapters: 319560
 
 Duplication rate: 4.12309%
 
-In addition to our short reads, we also had long reads. Long reads are required to fill gaps that might occur during short read assembly. Just like short reads, we also need to control the quality of our long reads and eliminate poor-quality reads. Here, I use `NanoPlot` to perform initial quality assesment of the single end long reads. 
+In addition to our short reads, we also had long reads. Long reads are required to fill gaps that might occur during short read assembly. Just like short reads, we also need to control the quality of our long reads and eliminate poor-quality reads. Here, I use <code style="color : lightskyblue">NanoPlot</code> to perform initial quality assesment of the single end long reads. 
 
 ```bash
 micromamba activate 02_long_reads_qc
@@ -161,11 +161,11 @@ Here we obtained the fallowing statistics:
 
 ![image]
 
-Next I used `Filtlong` to clean and filter the long reads. `Filtlong` was used to retain high quality base calling data based on phred score, filter out reads that are too short, and ensure the most informative and relaible reads were kept for downstreem analysis.
+Next I used <code style="color : lightskyblue">Filtlong</code> to clean and filter the long reads. <code style="color : lightskyblue">Filtlong</code> was used to retain high quality base calling data based on phred score, filter out reads that are too short, and ensure the most informative and relaible reads were kept for downstreem analysis.
 
 This step is essential because long reads tend to contain higher error rates compared to short reads.
 
-After this step, I did post-cleaning quality check with `NanoPlot`again to confirm the improvements on the reads' quality. 
+After this step, I did post-cleaning quality check with <code style="color : lightskyblue">NanoPlot</code> again to confirm the improvements on the reads' quality. 
 
 ```bash
 # Trimming and Cleaning of Long Reads by Filtlong
@@ -185,9 +185,9 @@ NanoPlot --fastq ./clean_reads/*.gz \
 ![image]
 
 
-## Genome Assembly
+## <code style="color : lightskyblue">Genome Assembly</code>
 
-I used `Uniycler` to perform the genome assembly. `Uniycler`is a hybrid assembly tool that integrates both short reads and long reads to produce a high quality genome assembly. `Uniycler` combines the strenght of both data types. High base call accuracy of short reads to compensate errors in long reads, and contiguity of long reads to connect short reads. This hybrid approach increases the accuracy and completeness of the assembly.
+I used <code style="color : lightskyblue">Uniycler</code> to perform the genome assembly. <code style="color : lightskyblue">Uniycler</code> is a hybrid assembly tool that integrates both short reads and long reads to produce a high quality genome assembly. <code style="color : lightskyblue">Uniycler</code> combines the strenght of both data types. High base call accuracy of short reads to compensate errors in long reads, and contiguity of long reads to connect short reads. This hybrid approach increases the accuracy and completeness of the assembly.
 
 ```bash
 eval "$(micromamba shell hook --shell=bash)"
@@ -198,7 +198,7 @@ unicycler -1 ./short_reads_processed/clean_reads/241155E_R1_clean.fastq.gz -2 ./
 micromamba deactivate
 ```
 
-Post-assembly construction, quality of the assembly should be evaluated. For this I use `Quast`. By using `Quast`various metrics about contiguity, genome size, completeness, etc. can be evaluated about constructed assembly.
+Post-assembly construction, quality of the assembly should be evaluated. For this I use <code style="color : lightskyblue">Quast</code>. By using <code style="color : lightskyblue">Quast</code> various metrics about contiguity, genome size, completeness, etc. can be evaluated about constructed assembly.
 1. N50 and L50 Values
 2. Total Lenght of Assembly
 3. Number of Contigs
@@ -221,7 +221,7 @@ quast.py ./hybrid_assembly/assembly.fasta
 + -t 32
 ```
 
-Then I used `CheckM`and `CheckM2` to assess the completeness and contamination of the genome assembly. `CheckM`estimates the genome completeness by checkin for the presence of single-copy marker genes that are conserved across related organisms. `CheckM2` builds on `CheckM`and provide more sensitive analysis of contamination and genome completeness.
+Then I used <code style="color : lightskyblue">CheckM2</code> and <code style="color : lightskyblue">CheckM2</code> to assess the completeness and contamination of the genome assembly. <code style="color : lightskyblue">CheckM2</code> estimates the genome completeness by checkin for the presence of single-copy marker genes that are conserved across related organisms. <code style="color : lightskyblue">CheckM2</code> builds on <code style="color : lightskyblue">CheckM2</code> and provide more sensitive analysis of contamination and genome completeness.
 
 ```bash
 # CheckM
@@ -244,7 +244,7 @@ checkm2 predict --threads 32 --input ./assembly.fasta --output-directory ./assem
 micromamba deactivate
 ```
 
-To visualise genome assembly, I used `Bandage`. `Bandage`generates a graphical representation of the assembly, which allows us to inspect the assembly graph for unresolved regions like repeats or structural variants, identify circularised contigs often corresponds to plasmids or repeats, and confirm that the assembly graph was well-resolved and did not contain any excessive fragmentation.
+To visualise genome assembly, I used <code style="color : lightskyblue">Bandage</code>. <code style="color : lightskyblue">Bandage</code> generates a graphical representation of the assembly, which allows us to inspect the assembly graph for unresolved regions like repeats or structural variants, identify circularised contigs often corresponds to plasmids or repeats, and confirm that the assembly graph was well-resolved and did not contain any excessive fragmentation.
 
 
 
@@ -254,9 +254,9 @@ To visualise genome assembly, I used `Bandage`. `Bandage`generates a graphical r
 
 
 
-### Gene Annotation
+### <code style="color : lightskyblue">Gene Annotation</code>
 
-I used `Prokka` to perform gene annotation on the assembled genome. `Prokka`is a comprehensive annotation tool that identifies Genes, CDCs, rRNAs, tRNAs, and other functional elements within the genome. `Prokka`identifies predicted proteins and assigns annotations based on well-known databases. This step is crucial to understand the biological capabilities of the genome.
+I used <code style="color : lightskyblue">Prokka</code> to perform gene annotation on the assembled genome. <code style="color : lightskyblue">Prokka</code> is a comprehensive annotation tool that identifies Genes, CDCs, rRNAs, tRNAs, and other functional elements within the genome. <code style="color : lightskyblue">Prokka</code> identifies predicted proteins and assigns annotations based on well-known databases. This step is crucial to understand the biological capabilities of the genome.
 
 ```bash
 cd $WORK
@@ -266,9 +266,9 @@ prokka ./assembly.fasta --outdir $WORK/genomics/annotated_genome --kingdom Bacte
 micromamba deactivate
 ```
 
-### Classification of the Genomes
+### <code style="color : lightskyblue">Taxonomical Classification of The Assembled Genome</code>
 
-To classify the assembled genome, I used `GTDB-Tk`(Genome Taxonomy Database Toolkit). This provides taxonomic assignments based on GTDB. It identifies the position of the organism in the Tree of Life and determines the taxonomical identity of the organisms.
+To classify the assembled genome, I used <code style="color : lightskyblue">GTDB-Tk</code> (Genome Taxonomy Database Toolkit). This provides taxonomic assignments based on GTDB. It identifies the position of the organism in the Tree of Life and determines the taxonomical identity of the organisms.
 
 
 ```bash
@@ -284,9 +284,9 @@ gtdbtk classify_wf --cpus 4 --genome_dir $WORK/genomics/annotated_genome --out_d
 micromamba deactivate
 ```
 
-### Combining Quality Check Reports
+### <code style="color : lightskyblue">Combining Quality Control Reports</code>
 
-Finally I used `MultiQC` to integrate all the quality control reports genereted during my workflow.
+Finally I used <code style="color : lightskyblue">MultiQC</code> to integrate all the quality control reports genereted during my workflow.
 
 ```bash
 cd $WORK
