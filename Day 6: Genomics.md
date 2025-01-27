@@ -58,7 +58,7 @@ export MAMBA_ROOT_PREFIX=$WORK/.micromamba
 cd $WORK
 ```
 
-## <code style="color : lightskyblue">Quality Control</code>
+## Quality Control
 
 Here we used <code style="color : lightskyblue">fastqc</code> to evaluate the quality of the raw paired-end short reads. This step is crucial to identify potential issues with our sequences. Such issues might be low base calling, contamination by adapter sequences and over-represented k-mers, GC content biases, etc. By using <code style="color : lightskyblue">fastqc</code>, we will know what we need to trim, and remove from our reads.
 
@@ -185,7 +185,7 @@ NanoPlot --fastq ./clean_reads/*.gz \
 ![image]
 
 
-## <code style="color : lightskyblue">Genome Assembly</code>
+## Genome Assembly
 
 I used <code style="color : lightskyblue">Uniycler</code> to perform the genome assembly. <code style="color : lightskyblue">Uniycler</code> is a hybrid assembly tool that integrates both short reads and long reads to produce a high quality genome assembly. <code style="color : lightskyblue">Uniycler</code> combines the strenght of both data types. High base call accuracy of short reads to compensate errors in long reads, and contiguity of long reads to connect short reads. This hybrid approach increases the accuracy and completeness of the assembly.
 
@@ -254,7 +254,7 @@ To visualise genome assembly, I used <code style="color : lightskyblue">Bandage<
 
 
 
-### <code style="color : lightskyblue">Gene Annotation</code>
+### Gene Annotation
 
 I used <code style="color : lightskyblue">Prokka</code> to perform gene annotation on the assembled genome. <code style="color : lightskyblue">Prokka</code> is a comprehensive annotation tool that identifies Genes, CDCs, rRNAs, tRNAs, and other functional elements within the genome. <code style="color : lightskyblue">Prokka</code> identifies predicted proteins and assigns annotations based on well-known databases. This step is crucial to understand the biological capabilities of the genome.
 
@@ -266,7 +266,7 @@ prokka ./assembly.fasta --outdir $WORK/genomics/annotated_genome --kingdom Bacte
 micromamba deactivate
 ```
 
-### <code style="color : lightskyblue">Taxonomical Classification of The Assembled Genome</code>
+### Classification of the Genomes
 
 To classify the assembled genome, I used <code style="color : lightskyblue">GTDB-Tk</code> (Genome Taxonomy Database Toolkit). This provides taxonomic assignments based on GTDB. It identifies the position of the organism in the Tree of Life and determines the taxonomical identity of the organisms.
 
@@ -284,7 +284,7 @@ gtdbtk classify_wf --cpus 4 --genome_dir $WORK/genomics/annotated_genome --out_d
 micromamba deactivate
 ```
 
-### <code style="color : lightskyblue">Combining Quality Control Reports</code>
+### Combining Quality Check Reports
 
 Finally I used <code style="color : lightskyblue">MultiQC</code> to integrate all the quality control reports genereted during my workflow.
 
