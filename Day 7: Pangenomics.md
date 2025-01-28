@@ -20,7 +20,7 @@ In essence, pangenomics focuses on `cataloguing, analyzing, and utilizing` the g
 
 ## Types of Computational Pangenomes
 ### Presence–Absence Variation (PAV) Pangenome
-PAV pangenomes quantify the `presence` and `absence` of genes within a population. They identify the `core genome`, which includes all of the genes present in all members of the population, and the `accessory/dispensable genome`, which includes all of the genes present in a subset of the population.
+PAV pangenomes quantify the `presence` and `absence` of genes within a population. They identify the `core genome`, which includes all of the genes present in all members of the population, `accessory/dispensable genome`, which includes all of the genes present in a subset of the population, and `Singletons` which are only present in one individual of the population.
 
 Core gene functions are generally under high selective pressure and are highly conserved within the population. They tend to be older and essential for survival, while accessory genes tend to be less conserved and responsible for variations in lifestyle and evolutionary trajectories.
 
@@ -68,3 +68,225 @@ Pangenomes typically represent only a subset of variation to remain functional.
 - Haplotype inference
 - Functional pangenomics
 - Graph pangenome challenges
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=contig
+#SBATCH --output=contig.out
+#SBATCH --error=contig.err
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=25G
+#SBATCH --partition=base
+#SBATCH --time=5:00:00
+#SBATCH --reservation=biol217
+
+#load necessary modules
+module load gcc12-env/12.1.0
+module load micromamba/1.4.2
+cd /work_beegfs/sunam227/pangenomics/
+eval "$(micromamba shell hook --shell=bash)"
+export MAMBA_ROOT_PREFIX=$WORK/.micromamba
+micromamba activate .micromamba/envs/00_anvio/
+```
+
+Here, we first download the genomes of 52 *Vibrio jasicida* strains to compare them using Anvi´o. We will create a pangenome to analyse and visualise it.
+
+Let´s start with downloading the genomes.
+
+```bash
+# Run on Front to Download the Data
+curl -L https://ndownloader.figshare.com/files/28965090 -o V_jascida_genomes.tar.gz
+tar -zxvf V_jascida_genomes.tar.gz
+ls V_jascida_genomes
+```
+
+## Contig Database Creation and Processing
+
+After downloading our genomes, I created a contig database `contig.dbs` from `.fasta` files. Each genome must be processed into an Anvi´o contigs database (contigs.db), which stores information about contigs, genes, and annotations. Here I used `anvi-script-reformat-fasta` to remove contigs smaller than 2500 nucleotides to eliminate low-quality results and simplify sequence names. Then I used `anvi-gen-contig-database` to convert each genome´s FASTA file into an Anvi´o database.
+
+```bash
+cd ./V_jascida_genomes/
+ls *fasta | awk 'BEGIN{FS="_"}{print $1}' > genomes.txt
+
+
+cd /work_beegfs/sunam227/pangenomics/V_jascida_genomes
+# remove all contigs <2500 nt
+for g in `cat genomes.txt`
+do
+    echo
+    echo "Working on $g ..."
+    echo
+    anvi-script-reformat-fasta ${g}_scaffolds.fasta \
+                               --min-len 2500 \
+                               --simplify-names \
+                               -o ${g}_scaffolds_2.5K.fasta
+done
+
+# generate contigs.db
+for g in `cat genomes.txt`
+do
+    echo
+    echo "Working on $g ..."
+    echo
+    anvi-gen-contigs-database -f ${g}_scaffolds_2.5K.fasta \
+                              -o V_jascida_${g}.db \
+                              --num-threads 4 \
+                              -n V_jascida_${g}
+done
+
+# annotate contigs.db
+for g in *.db
+do
+    anvi-run-hmms -c $g --num-threads 4
+    anvi-run-ncbi-cogs -c $g --num-threads 4
+    anvi-scan-trnas -c $g --num-threads 4
+    anvi-run-scg-taxonomy -c $g --num-threads 4
+done
+```
+
+After that we will visualise our `contigs.db`. In order to do that we need to access `Anvi´o Interactive` by running fallowing commands on the terminal.
+
+```bash
+module load gcc12-env/12.1.0
+module load micromamba/1.4.2
+cd $WORK
+micromamba activate .micromamba/envs/00_anvio/
+
+anvi-display-contigs-stats /work_beegfs/sunam227/pangenomics/V_jascida_genomes/*db
+
+srun --reservation=biol217 --pty --mem=16G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --partition=base /bin/bash
+
+module load gcc12-env/12.1.0
+module load micromamba/1.4.2
+cd $WORK
+micromamba activate .micromamba/envs/00_anvio/
+anvi-display-contigs-stats /work_beegfs/sunam227/pangenomics/V_jascida_genomes/*db
+```
+
+Then by opening a new terminal, fallowing commands needed to run.
+
+```bash
+ssh -L 8060:localhost:8080 sunam###@caucluster.rz.uni-kiel.de
+ssh -L 8080:localhost:8080 n100
+```
+
+If you want to exit from the node use `Ctrl + D` twice.
+
+We´ll continue with creating external genomes file. I used `anvi-script-gen-genomes-file` to vreate my external genome file, which will serve as an input for pangenome analysis.
+
+```bash
+anvi-script-gen-genomes-file --input-dir /work_beegfs/sunam227/pangenomics/V_jascida_genomes \
+                             -o external-genomes.txt
+```
+
+Then I compute my pangenome
+
+```bash
+cd /work_beegfs/sunam227/pangenomics/V_jascida_genomes
+anvi-gen-genomes-storage -e external-genomes.txt \
+                         -o V_jascida-GENOMES.db
+
+anvi-pan-genome -g V_jascida-GENOMES.db \
+                --project-name V_jascida \
+                --num-threads 4          
+```
+
+Display of pangenome (on the terminal)
+
+```bash
+srun --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --partition=base /bin/bash
+
+module load gcc12-env/12.1.0
+module load micromamba/1.4.2
+cd $WORK
+micromamba activate .micromamba/envs/00_anvio/
+
+anvi-display-pan -p /work_beegfs/sunam227/pangenomics/V_jascida_genomes/V_jascida/V_jascida-PAN.db \
+                 -g /work_beegfs/sunam227/pangenomics/V_jascida_genomes/V_jascida-GENOMES.db
+
+
+
+ssh -L 8060:localhost:8080 sunam227@caucluster.rz.uni-kiel.de
+```
+
+
+Here after we use the fallowing commands
+
+```bash
+#!/bin/bash
+#SBATCH --job-name=contig
+#SBATCH --output=contig.out
+#SBATCH --error=contig.err
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=25G
+#SBATCH --partition=base
+#SBATCH --time=5:00:00
+#SBATCH --reservation=biol217
+
+#load necessary modules
+module load gcc12-env/12.1.0
+module load micromamba/1.4.2
+cd /work_beegfs/sunam227/test_pangenome/
+eval "$(micromamba shell hook --shell=bash)"
+export MAMBA_ROOT_PREFIX=$WORK/.micromamba
+micromamba activate 00_anvio
+
+
+
+
+
+cd /work_beegfs/sunam227/test_pangenome/sequences
+#for file in *.fna; do mv "$file" "${file%.fna}.fasta"; done
+
+#ls *fasta | awk 'BEGIN{FS="."}{print $1}' > genomes.txt
+
+# remove all contigs <2500 nt
+#for g in `cat genomes.txt`
+#do
+#    echo
+#    echo "Working on $g ..."
+#    echo
+#    anvi-script-reformat-fasta ${g}.fasta \
+#                               --min-len 2500 \
+#                               --simplify-names \
+#                               -o ${g}_2.5K.fasta
+#done
+
+# generate contigs.db
+#for g in `cat genomes.txt`
+#do
+#    echo
+#    echo "Working on $g ..."
+#    echo
+#    anvi-gen-contigs-database -f ${g}_2.5K.fasta \
+#                              -o Anabaena_${g}.db \
+#                              --num-threads 4 \
+#                              -n Anabaena_${g}
+#done
+
+# annotate contigs.db
+for g in *.db
+do
+    anvi-run-hmms -c $g --num-threads 4
+    anvi-run-ncbi-cogs -c $g --num-threads 4
+    anvi-scan-trnas -c $g --num-threads 4
+    anvi-run-scg-taxonomy -c $g --num-threads 4
+done
+
+
+anvi-script-gen-genomes-file --input-dir /work_beegfs/sunam227/test_pangenome/sequences \
+                             -o external-genomes.txt
+
+#micromamba activate .micromamba/envs/00_anvio/
+
+# ##----------------- End -------------
+module purge
+jobinfo
+```
+
+
+http://0.0.0.0:8082
