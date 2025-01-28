@@ -1,20 +1,55 @@
-with metaquast, quality oc the genome assembly is can be evaluated
+## Quality of Assembly
+I used the `grep` command to count the number of contigs in the `final.contigs.fa` file. This step provides an overview of the assembly output by determining the total number of contigs generated, which can indicate the fragmentation level of the assembly.
+
+```bash
+grep -c ">" final.contigs.fa
+```
+
+Then I used `MetaQUAST` to assess the quality of the metagenome assembly. With `MetaQUAST`, quality of the genome assembly is can be evaluated
 
 ```bash
 metaquast -t 6 -o /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/3_metaquast -m 1000 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/final.contigs.fa
 ```
-# Genome Binning
 
-firstly fasta sequence IDs needed to be reformatted for binning step to work  properly.
+`MetaQUAST` evaluates various metrics like `N50 Value`, that is a measure of assembly contiguity. A higher N50 value indicates a more contiguous assembly, which is particularly important in metagenomics as it reflects better resolution of genomic regions and fewer fragmented contigs.
+
+
+
+
+
+## Genome Binning
+
+Genome binning is the process of grouping contigs from metagenome assemblies into bins, each representing a draft genome of an individual species or strain in the sample.
+
+In metagenomics, the assembly typically contains contigs from multiple species in the community. Binning enables us to reconstruct individual genomes, which is critical for:
+- Identifying and characterizing species present in the sample.
+- Studying the functional and metabolic potential of each organism.
+- Understanding microbial interactions in the environment.
+
+To ensure compatibility with Anvi’o, I reformatted the FASTA sequence IDs using `anvi-script-reformat-fasta` command. This step is required for downstream processing in Anvi’o.
 
 ```bash
+# Preparing the Fasta File for Anvi'o
 anvi-script-reformat-fasta /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/final.contigs.fa -o /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/contigs.anvio.fa --min-len 1000 --simplify-names --report-file nameconversion.txt
 ```
-Then using bowtie2, the clean reads needed to be mapped onto assembled contigs
+
+### Mapping
+
+I used `bowtie2-build` to create an index of the reference fasta file. Indexing allows `Bowtie2` to efficiently map reads to the reference sequences.
 
 ```bash
+# Indexing the Referance Genome
 bowtie2-build /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/contigs.anvio.fa /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/contigs-anvio.fa.index
+```
 
+Next, I used `Bowtie2` to map the processed reads back to the assembled contigs, generating `.sam` (Sequence Alignment/Map) files. A SAM file is a text-based format that stores read alignments to the reference genome. It contains detailed information about each mapped read, such as:
+- The read sequence
+- The reference sequence it aligns to
+- The position of the alignment
+- Alignment quality scores
+
+```bash
+# Mapping with Bowtie2
 # for sample 1
 bowtie2 --very-fast -x /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/contigs-anvio.fa.index -1 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/BGR_130305_clean_R1.fastq.gz -2 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/BGR_130305_clean_R2.fastq.gz -S /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/sample1.sam
 
@@ -25,9 +60,13 @@ bowtie2 --very-fast -x /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/mega
 bowtie2 --very-fast -x /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/contigs-anvio.fa.index -1 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/BGR_130708_clean_R1.fastq.gz -2 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/BGR_130708_clean_R2.fastq.gz -S /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/sample3.sam
 ```
 
-the output of the bowtie2 is in .sam (Sequence Mapping File). After obtaining our .sam file, we will convert it to .bam file for further processes by using samstool.
+Then I converted the `.sam` files into `.bam` files using `samtools`. A BAM file is the binary version of a SAM file.
+- Smaller in size, saving storage space.
+- Faster to process due to its binary format.
+- Enables downstream analysis with tools that require BAM files.
 
 ```bash
+# Conversing SAM Files to BAM Files
 # sample 1
 samtools view -bS /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/sample1.sam > /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/sample1.bam
 
@@ -38,32 +77,39 @@ samtools view -bS /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/sample2.s
 samtools view -bS /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/sample3.sam > /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/sample3.bam
 ```
 
-# Contig Data Preperation
-
-For contig data preperation steps we require anvi´o contigs-db database. This contigs database contains information about sequences in our samples.
+For contig data preperation steps we require anvi´o `contigs-db` database. This contigs database contains information about sequences in our samples.
 
 ```bash
 anvi-gen-contigs-database -f /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/contigs.anvio.fa -o /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/contigs.db -n 'biol217'
 ```
 
-then Hidden Markov Model search should be run on contigs to search for specific genes.
+After, I ran anvi-run-hmms to perform a Hidden Markov Model (HMM) search on the contigs to search for specific genes.
 
 ```bash
+# HMM Search
 cd /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/
 anvi-run-hmms -c contigs.db
 ```
 
-# Binning with Anvi´O
+### Binning with Anvi´O
+
+Then I performed genome binning using Anvi’o, which groups contigs into bins based on:
+- K-mer frequencies
+- Coverage data from the mapped reads
+- Taxonomic signals from marker genes
+
+In order to do that first, we will sort and index our BAM files.
 
 ```bash
-# Sorting and Indexing bam files
+# Sorting and Indexing BAM files
 cd /work_beegfs/sunam227/metagenomics/0_raw_reads/clean
 for file in *.bam; do anvi-init-bam $file -o "$file".sorted.bam; done
 ```
 
-For binning we need to create anvi´o profile to store sample specific information about contigs
+After indexing our BAM files, I generated Anvi’o profiles for each sample using `anvi-profile`, which stores sample-specific information for each contig. These profiles then were merged into a single profile using `anvi-merge`.
 
 ```bash
+# Anvi' Profile Generation
 cd /work_beegfs/sunam227/metagenomics/0_raw_reads/clean
 
 # Sample 1
@@ -74,13 +120,15 @@ anvi-profile -i sample2.bam.sorted.bam -c contigs.db --output-dir  /work_beegfs/
 
 # Sample 3
 anvi-profile -i sample3.bam.sorted.bam -c contigs.db --output-dir  /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/profile3
+```
 
-# Then the created profiles for each sample we had needed to be merged into single profile
+```bash
+# Merging Anvi'o Profiles
 cd /work_beegfs/sunam227/metagenomics/0_raw_reads/clean
 anvi-merge ./profile1/PROFILE.db ./profile2/PROFILE2.db ./profile3/PROFILE3.db -o /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/mergedprof -c contigs.db --enforce-hierarchical-clustering
 ```
 
-Now genome binning can be performed by using both Metabat2 or MaxBin2. In genome binning, contigs belonging to same genome are grouping together.
+To complement Anvi’o binning, I used `MetaBAT2` and `MaxBin2`, two widely used automated binning tools. Each tool uses different algorithms. `MetaBAT2` groups contigs based on coverage and sequence composition across multiple samples, while `MaxBin2` uses probabilistic methods to assign contigs to bins.
 
 ```bash
 # Binning with Metabat2
@@ -88,7 +136,11 @@ cd /work_beegfs/sunam227/metagenomics/0_raw_reads/clean
 anvi-cluster-contigs -p ./mergedprof/PROFILE.db -c contigs.db -C METABAT2 --driver metabat2 --just-do-it --log-file log-metabat2
 
 anvi-summarize -p ./mergedprof/PROFILE.db -c contigs.db -o SUMMARY_METABAT2 -C METABAT2
+```
 
+### !!!PUT METABAT RESULT!!!
+
+```bash
 # binning with MaxBin2
 cd /work_beegfs/sunam227/metagenomics/0_raw_reads/clean
 anvi-cluster-contigs -p ./mergedprof/PROFILE.db -c contigs.db -C MAXBIN2 --driver maxbin2 --just-do-it --log-file log-maxbin2
@@ -96,12 +148,36 @@ anvi-cluster-contigs -p ./mergedprof/PROFILE.db -c contigs.db -C MAXBIN2 --drive
 anvi-summarize -p ./mergedprof/PROFILE.db -c contigs.db -o SUMMARY_MAXBIN2 -C MAXBIN2
 ```
 
+### !!!PUT MAXBIN RESULT!!!
+
 In the summary we can see that number of Archeal bin we got is 3 for Metabat2 and 0 for Maxbin2.
 
-After binning we need to estimate our genome completnes and contamination levels
+### MAGs Quality Estimation
+
+MAGs (Metagenome-Assembled Genomes) are genomes reconstructed from metagenomic data. Instead of sequencing individual organisms in a microbial community, metagenomics captures all the DNA in a sample. MAGs are created by assembling and binning this mixed genomic data, where each MAG ideally represents the genome of a single species or strain.
+
+Importance of MAGs
+- Enable the reconstruction of genomes for uncultured or hard-to-culture microbes directly from environment.
+- Allow us to study the metabolic potential, ecological roles, and interactions of individual organisms within the microbial community.
+- Provide insights into microbial diversity, evolution, and functional pathways in complex environments.
+
+While MAGs are powerful, they can sometimes be incomplete or contaminated (contain sequences from multiple organisms), which is why assessing their quality is crucial.
+
+Here I used `anvi-estimate-genome-completeness` to evaluate the quality of the MAGs. This step estimates:
+- **Genome Completeness**: The proportion of conserved single-copy marker genes present in the genome. Higher completeness indicates a more complete representation of the genome.
+- **Contamination**: The presence of duplicate or non-target marker genes, which suggests that the bin may contain sequences from multiple organisms. Minimizing contamination ensures the MAG represents a single organism.
+
+This step is critical because accurate genome reconstructions rely on maximizing completeness while minimizing contamination.
 
 ```bash
+# Quality Assesment of MAGs
 cd /work_beegfs/sunam227/metagenomics/0_raw_reads/clean
 anvi-estimate-genome-completeness -c contigs.db -p ./mergedprof/PROFILE.db -C METABAT2
 anvi-estimate-genome-completeness -p ./mergedprof/PROFILE.db -c contigs.db --list-collections
 ```
+
+The quality of each bin was assessed based on:
+- **High-Quality MAGs**: >90% completeness and <5% contamination.
+- **Medium-Quality MAGs**: >50% completeness and <10% contamination.
+
+This step ensures that the MAGs are of sufficient quality to proceed with downstream analyses, such as functional annotation, metabolic reconstruction, and phylogenetic classification.
