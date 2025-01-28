@@ -2,9 +2,9 @@
 ## Quality Control
 ```bash
 #!/bin/bash
-#SBATCH --job-name=fastqc
-#SBATCH --output=fastqc.out
-#SBATCH --error=fastqc.err
+#SBATCH --job-name=TASK
+#SBATCH --output=TASK.out
+#SBATCH --error=TASK.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=12

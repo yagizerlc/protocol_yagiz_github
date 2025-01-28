@@ -1,4 +1,30 @@
-## Quality of Assembly
+```bash
+#!/bin/bash
+#SBATCH --job-name=TASK
+#SBATCH --output=TASK.out
+#SBATCH --error=TASK.err
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=1
+#SBATCH --cpus-per-task=12
+#SBATCH --mem=25G
+#SBATCH --partition=base
+#SBATCH --time=5:00:00
+#SBATCH --reservation=biol217
+
+#load necessary modules
+module load gcc12-env/12.1.0
+module load micromamba
+eval "$(micromamba shell hook --shell=bash)"
+export MAMBA_ROOT_PREFIX=$WORK/.micromamba
+
+cd $WORK
+
+micromamba activate .micromamba/envs/00_anvio/
+```
+
+Previous day we prepared our metagenome assembly and now we will continue from then. We will start with checking quality of our assembly.
+
+## Assembly Quality Estimation
 I used the `grep` command to count the number of contigs in the `final.contigs.fa` file. This step provides an overview of the assembly output by determining the total number of contigs generated, which can indicate the fragmentation level of the assembly.
 
 ```bash
@@ -152,7 +178,7 @@ anvi-summarize -p ./mergedprof/PROFILE.db -c contigs.db -o SUMMARY_MAXBIN2 -C MA
 
 In the summary we can see that number of Archeal bin we got is 3 for Metabat2 and 0 for Maxbin2.
 
-### MAGs Quality Estimation
+## MAGs Quality Estimation
 
 MAGs (Metagenome-Assembled Genomes) are genomes reconstructed from metagenomic data. Instead of sequencing individual organisms in a microbial community, metagenomics captures all the DNA in a sample. MAGs are created by assembling and binning this mixed genomic data, where each MAG ideally represents the genome of a single species or strain.
 
