@@ -169,19 +169,19 @@ Then by opening a new terminal, fallowing commands needed to run.
 
 ```bash
 ssh -L 8060:localhost:8080 sunam###@caucluster.rz.uni-kiel.de
-ssh -L 8080:localhost:8080 n100
+ssh -L 8080:localhost:8080 n100 # n100 and localhost should be changed according to assigned node and host
 ```
 
 If you want to exit from the node use `Ctrl + D` twice.
 
-We´ll continue with creating external genomes file. I used `anvi-script-gen-genomes-file` to vreate my external genome file, which will serve as an input for pangenome analysis.
+We´ll continue with creating external genomes file. I used `anvi-script-gen-genomes-file` to create my external genome file, which will serve as an input for pangenome analysis.
 
 ```bash
 anvi-script-gen-genomes-file --input-dir /work_beegfs/sunam227/pangenomics/V_jascida_genomes \
                              -o external-genomes.txt
 ```
 
-Then I compute my pangenome
+Then I compute my pangenome with fallowing commands
 
 ```bash
 cd /work_beegfs/sunam227/pangenomics/V_jascida_genomes
@@ -193,7 +193,7 @@ anvi-pan-genome -g V_jascida-GENOMES.db \
                 --num-threads 4          
 ```
 
-Display of pangenome (on the terminal)
+To display our pangeome we will run fallowing command on the terminal
 
 ```bash
 srun --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --partition=base /bin/bash
@@ -207,8 +207,9 @@ anvi-display-pan -p /work_beegfs/sunam227/pangenomics/V_jascida_genomes/V_jascid
                  -g /work_beegfs/sunam227/pangenomics/V_jascida_genomes/V_jascida-GENOMES.db
 
 
-
+# In another terminal
 ssh -L 8060:localhost:8080 sunam227@caucluster.rz.uni-kiel.de
+ssh -L 8080:localhost:8080 n100 # n100 and localhost should be changed according to assigned node and host
 ```
 
 
@@ -240,33 +241,33 @@ micromamba activate 00_anvio
 
 
 cd /work_beegfs/sunam227/test_pangenome/sequences
-#for file in *.fna; do mv "$file" "${file%.fna}.fasta"; done
+for file in *.fna; do mv "$file" "${file%.fna}.fasta"; done
 
-#ls *fasta | awk 'BEGIN{FS="."}{print $1}' > genomes.txt
+ls *fasta | awk 'BEGIN{FS="."}{print $1}' > genomes.txt
 
 # remove all contigs <2500 nt
-#for g in `cat genomes.txt`
-#do
-#    echo
-#    echo "Working on $g ..."
-#    echo
-#    anvi-script-reformat-fasta ${g}.fasta \
-#                               --min-len 2500 \
-#                               --simplify-names \
-#                               -o ${g}_2.5K.fasta
-#done
+for g in `cat genomes.txt`
+do
+    echo
+    echo "Working on $g ..."
+    echo
+    anvi-script-reformat-fasta ${g}.fasta \
+                               --min-len 2500 \
+                               --simplify-names \
+                               -o ${g}_2.5K.fasta
+done
 
 # generate contigs.db
-#for g in `cat genomes.txt`
-#do
-#    echo
-#    echo "Working on $g ..."
-#    echo
-#    anvi-gen-contigs-database -f ${g}_2.5K.fasta \
-#                              -o Anabaena_${g}.db \
-#                              --num-threads 4 \
-#                              -n Anabaena_${g}
-#done
+for g in `cat genomes.txt`
+do
+    echo
+    echo "Working on $g ..."
+    echo
+    anvi-gen-contigs-database -f ${g}_2.5K.fasta \
+                              -o Anabaena_${g}.db \
+                              --num-threads 4 \
+                              -n Anabaena_${g}
+done
 
 # annotate contigs.db
 for g in *.db
