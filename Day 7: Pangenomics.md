@@ -58,6 +58,10 @@ It’s impossible to capture the full extent of variation for larger organisms d
 Pangenomes typically represent only a subset of variation to remain functional.
 
 ### Applications
+- Estimating Evolutionary Trajectories
+- Estimating gene functionality
+- Study of functional specialisation and redundancy
+- Community Dynamics and Population Genetics
 - Genotyping and variant calling
 - Haplotype inference
 - Functional pangenomics
