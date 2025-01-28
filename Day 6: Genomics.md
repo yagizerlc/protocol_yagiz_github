@@ -190,6 +190,7 @@ NanoPlot --fastq ./clean_reads/*.gz \
 I used <code style="color : lightskyblue">Uniycler</code> to perform the genome assembly. <code style="color : lightskyblue">Uniycler</code> is a hybrid assembly tool that integrates both short reads and long reads to produce a high quality genome assembly. <code style="color : lightskyblue">Uniycler</code> combines the strenght of both data types. High base call accuracy of short reads to compensate errors in long reads, and contiguity of long reads to connect short reads. This hybrid approach increases the accuracy and completeness of the assembly.
 
 ```bash
+# Hybrid Assembly Construction
 eval "$(micromamba shell hook --shell=bash)"
 micromamba activate 03_unicycler
 cd $WORK/genomics
@@ -259,6 +260,7 @@ To visualise genome assembly, I used <code style="color : lightskyblue">Bandage<
 I used <code style="color : lightskyblue">Prokka</code> to perform gene annotation on the assembled genome. <code style="color : lightskyblue">Prokka</code> is a comprehensive annotation tool that identifies Genes, CDCs, rRNAs, tRNAs, and other functional elements within the genome. <code style="color : lightskyblue">Prokka</code> identifies predicted proteins and assigns annotations based on well-known databases. This step is crucial to understand the biological capabilities of the genome.
 
 ```bash
+# Gene Annotation
 cd $WORK
 micromamba activate .micromamba/envs/05_prokka
 cd $WORK/genomics/hybrid_assembly
@@ -272,7 +274,7 @@ To classify the assembled genome, I used <code style="color : lightskyblue">GTDB
 
 
 ```bash
-# Activate required environments
+# Classification
 cd $WORK
 micromamba activate .micromamba/envs/06_gtdbtk
 conda env config vars set GTDBTK_DATA_PATH="$WORK/databases/gtdbtk/release220";
@@ -289,6 +291,7 @@ micromamba deactivate
 Finally I used <code style="color : lightskyblue">MultiQC</code> to integrate all the quality control reports genereted during my workflow.
 
 ```bash
+# Merging Reports
 cd $WORK
 micromamba activate .micromamba/envs/01_short_reads_qc
 multiqc -d $WORK/genomics/ -o $WORK/genomics/multiqc

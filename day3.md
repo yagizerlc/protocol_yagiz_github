@@ -1,22 +1,3 @@
-# Assembly Visualisation
-
-Using megahit, metagenomes optimesed for coassembly
-
-```bash
-cd /work_beegfs/sunam227/metagenomics/0_raw_reads/clean
-megahit -1 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/BGR_130305_clean_R1.fastq.gz -2 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/BGR_130305_clean_R2.fastq.gz --min-contig-len 1000 --presets meta-large -m 0.85 /work_beegfs/sunam227/metagenomics/0_raw_reads/assembly/ -t12
-megahit -1 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/BGR_130527_clean_R1.fastq.gz -2 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/BGR_130527_clean_R2.fastq.gz --min-contig-len 1000 --presets meta-large -m 0.85 /work_beegfs/sunam227/metagenomics/0_raw_reads/assembly/ -t12
-megahit -1 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/BGR_130708_clean_R1.fastq.gz -2 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/BGR_130708_clean_R2.fastq.gz --min-contig-len 1000 --presets meta-large -m 0.85 /work_beegfs/sunam227/metagenomics/0_raw_reads/assembly/ -t12
-```
-Then final.contigs.fa file converted to fastg file to visualise in Bandage by megahit toolkit
-
-```bash
-megahit_toolkit contig2fastg 99 /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/final.contigs.fa > /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_out/final.contigs.fastg
-```
-then using Bandage, contig graph can be visualised
-![image](./resources/graph.png)
-
-
 with metaquast, quality oc the genome assembly is can be evaluated
 
 ```bash
