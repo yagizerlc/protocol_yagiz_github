@@ -13,10 +13,12 @@ Pangenomics is the study of the pangenome. It involves:
 
 In essence, pangenomics focuses on `cataloguing, analyzing, and utilizing` the genomic diversity within a group of organisms.
 
-## Types of Pangenomes
+## Types of Biological Pangenomes
+
 
 ![image](./resources/Screenshot%202025-01-28%20at%2007.30.07.png)
 
+### Types of Computational Pangenomes
 ### Presence–Absence Variation (PAV) Pangenome
 PAV pangenomes quantify the `presence` and `absence` of genes within a population. They identify the `core genome`, which includes all of the genes present in all members of the population, and the `accessory/dispensable genome`, which includes all of the genes present in a subset of the population.
 
