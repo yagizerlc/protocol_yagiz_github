@@ -250,7 +250,7 @@ To visualise genome assembly, I used <code style="color : lightskyblue">Bandage<
 
 
 
-
+### !!!ASSEMBLY IMAGE!!!
 
 
 
@@ -301,3 +301,9 @@ multiqc -d $WORK/genomics/ -o $WORK/genomics/multiqc
 module purge
 jobinfo
 ```
+
+5. How good is the quality of genome?
+4. Why did we use Hybrid assembler?
+3. What is the difference between short and long reads?
+2. Did we use Single or Paired end reads? Why?
+1. Write down about the classification of genome we have used here

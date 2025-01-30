@@ -39,6 +39,12 @@ metaquast -t 6 -o /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_o
 
 `MetaQUAST` evaluates various metrics like `N50 Value`, that is a measure of assembly contiguity. A higher N50 value indicates a more contiguous assembly, which is particularly important in metagenomics as it reflects better resolution of genomic regions and fewer fragmented contigs.
 
+### Questions
+1. What is your N50 value? Why is this value relevant?
+2. How many contigs are assembled?
+- 54812
+3. What is the total length of the contigs?
+- 140329960
 
 
 
@@ -174,8 +180,6 @@ anvi-cluster-contigs -p ./mergedprof/PROFILE.db -c contigs.db -C MAXBIN2 --drive
 anvi-summarize -p ./mergedprof/PROFILE.db -c contigs.db -o SUMMARY_MAXBIN2 -C MAXBIN2
 ```
 
-### !!!PUT MAXBIN RESULT!!!
-
 
 ## Questions
 1- Number of ins you got from MetaBAT2 and MaxBin2?
@@ -216,4 +220,4 @@ This step ensures that the MAGs are of sufficient quality to proceed with downst
 - MetaBAT2
 
 2- How many Archeal bins do you get that are of High Quality? How many Bacterial bins do you get that are of High Quality?
-- 0 Archeal bins in high-quality, 
+- 0 Archeal bins in high-quality, 13 Bacterial bins with high-quality

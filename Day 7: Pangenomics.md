@@ -282,6 +282,41 @@ done
 anvi-script-gen-genomes-file --input-dir /work_beegfs/sunam227/test_pangenome/sequences \
                              -o external-genomes.txt
 
+
+cd /work_beegfs/sunam227/test-pangenome/sequences
+anvi-gen-genomes-storage -e external-genomes.txt \
+                         -o Anabanea-GENOMES.db
+
+anvi-pan-genome -g Anabanea-GENOMES.db \
+                --project-name Anabea \
+                --num-threads 4                         
+
+
+# 7- calculating average nucleotide identity ANI
+anvi-compute-genome-similarity --external-genomes external-genomes.txt \
+                               --program pyANI \
+                               --output-dir ANI \
+                               --num-threads 12 \
+                               --pan-db Anabea/Anabea-PAN.db 
+
+
+#8- phylogenomic tree
+anvi-get-sequences-for-gene-clusters -p Anabea/Anabea-PAN.db \
+                                     -g Anabanea-GENOMES.db \
+                                     --min-num-genomes-gene-cluster-occurs 6 \
+                                     --max-num-genes-from-each-genome 1 \
+                                     --concatenate-gene-clusters \
+                                     --output-file Anabea/Anabanea-SCGs.fa
+
+
+trimal -in Anabea/Anabanea-SCGs.fa \
+       -out Anabea/Anabanea-SCGs-clean.fa \
+       -gt 0.5
+
+
+anvi-display-pan -p Anabea/Anabea-PAN.db \
+                    -g Anabaneas-GENOMES.db
+
 #micromamba activate .micromamba/envs/00_anvio/
 
 # ##----------------- End -------------
