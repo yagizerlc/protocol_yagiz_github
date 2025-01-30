@@ -212,14 +212,42 @@ ssh -L 8060:localhost:8080 sunam227@caucluster.rz.uni-kiel.de
 ssh -L 8080:localhost:8080 n100 # n100 and localhost should be changed according to assigned node and host
 ```
 
+Now let's perform another pangenome analysis by using another species. In the fallowing part we will run the script as it is instead of one by one. Now let's check our data.
 
-Here after we use the fallowing commands
+Instead of using single-species, I decided to perform a same genus multi-species pangenome analysis to understand their genomic diversity, evolutionary relationships, and functional differences. By analyzing the pangenome of 6 different species, we can classify genes into three main categories:
+- Core genome: Genes shared by all species, essential for basic survival and defining the genus.
+- Accessory genome: Genes present in some species but absent in others, related to adaptation, niche specialization, and strain-level differences.
+
+since we do not have multiple sequences from each species we can't able to detect singletons and intra-specific variation.
+
+By studying multiple species we can also study how their genomes have evolved from a common ancestor. Identifying gene gain, loss, and horizontal gene transfer (HGT) events can reveal how different species diverged and adapted to different environments.
+
+We are going to analyse three different *Anabanea* species, you can download the sequences from here:
+1. *Anabaena cylindrica* [PCC 7122](https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_000317695.1/)
+2. *Anabaena sphaerica* [FACHB-251](https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_014696825.1/)
+3. *Anabaena lutea* [FACHB-196](https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_014698305.1/)
+4. *Anabaena azotica* [FACHB-119](https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_014697625.1/)
+5. *Anabaena catenula* [FACHB-362](https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_014698735.1/)
+6. *Anabaena subtropica* [FACHB-260](https://www.ncbi.nlm.nih.gov/datasets/genome/GCF_014697105.1/)
+
+In case you are going to perform more detailed work, you can add more individuals for each species and can include intra-species variations in your analysis.
+
+## *Anabaena* Genus
+The genus *Anabaena* consists of filamentous, heterocyst-forming cyanobacteria commonly found in freshwater, soil, and symbiotic relationships with plants. Ecological properties and diverse habitat occupation of these species make *Anabaena* an essential genus for studying environmental microbiology, evolutionary genomics, and biotechnological applications.
+
+### By analyzing these six species, we can
+- Identify core genes shared across Anabaena, revealing genus-level essential functions.
+- Discover accessory genes unique to specific species, explaining ecological and physiological differences.
+- Study genomic adaptations to different environments.
+- Investigate nitrogen fixation efficiency, photosynthetic pathways, and metabolic diversity of each species.
+- Understand horizontal gene transfer (HGT) and how species evolve within the genus.
+
 
 ```bash
 #!/bin/bash
-#SBATCH --job-name=contig
-#SBATCH --output=contig.out
-#SBATCH --error=contig.err
+#SBATCH --job-name=pangenome
+#SBATCH --output=pangenome.out
+#SBATCH --error=pangenome.err
 #SBATCH --nodes=1
 #SBATCH --ntasks-per-node=1
 #SBATCH --cpus-per-task=12
@@ -236,16 +264,12 @@ eval "$(micromamba shell hook --shell=bash)"
 export MAMBA_ROOT_PREFIX=$WORK/.micromamba
 micromamba activate 00_anvio
 
-
-
-
-
 cd /work_beegfs/sunam227/test_pangenome/sequences
-for file in *.fna; do mv "$file" "${file%.fna}.fasta"; done
 
+for file in *.fna; do mv "$file" "${file%.fna}.fasta"; done
 ls *fasta | awk 'BEGIN{FS="."}{print $1}' > genomes.txt
 
-# remove all contigs <2500 nt
+# 1 remove all contigs <2500 nt
 for g in `cat genomes.txt`
 do
     echo
@@ -257,7 +281,7 @@ do
                                -o ${g}_2.5K.fasta
 done
 
-# generate contigs.db
+# 2 generate contigs.db
 for g in `cat genomes.txt`
 do
     echo
@@ -269,7 +293,7 @@ do
                               -n Anabaena_${g}
 done
 
-# annotate contigs.db
+# 3 annotate contigs.db
 for g in *.db
 do
     anvi-run-hmms -c $g --num-threads 4
@@ -278,11 +302,14 @@ do
     anvi-run-scg-taxonomy -c $g --num-threads 4
 done
 
-
+# 4 creating an external genome file
 anvi-script-gen-genomes-file --input-dir /work_beegfs/sunam227/test_pangenome/sequences \
                              -o external-genomes.txt
 
+# 5 Estimating contamination
+anvi-estimate-genome-completeness -e external-genomes.txt
 
+# 6 computing a pangenome
 cd /work_beegfs/sunam227/test-pangenome/sequences
 anvi-gen-genomes-storage -e external-genomes.txt \
                          -o Anabanea-GENOMES.db
@@ -291,8 +318,18 @@ anvi-pan-genome -g Anabanea-GENOMES.db \
                 --project-name Anabea \
                 --num-threads 4                         
 
+###############################################################
 
-# 7- calculating average nucleotide identity ANI
+# We can display our pangenome here if we want
+anvi-display-pan -p Anabea/Anabea-PAN.db \
+                    -g Anabaneas-GENOMES.db
+
+# Here in the naming there is a mistake I did, but just make
+# sure you are writing the same file names at this point
+
+###############################################################
+
+# 7 calculating average nucleotide identity ANI
 anvi-compute-genome-similarity --external-genomes external-genomes.txt \
                                --program pyANI \
                                --output-dir ANI \
@@ -300,7 +337,7 @@ anvi-compute-genome-similarity --external-genomes external-genomes.txt \
                                --pan-db Anabea/Anabea-PAN.db 
 
 
-#8- phylogenomic tree
+# 8 phylogenomic tree
 anvi-get-sequences-for-gene-clusters -p Anabea/Anabea-PAN.db \
                                      -g Anabanea-GENOMES.db \
                                      --min-num-genomes-gene-cluster-occurs 6 \
@@ -313,7 +350,24 @@ trimal -in Anabea/Anabanea-SCGs.fa \
        -out Anabea/Anabanea-SCGs-clean.fa \
        -gt 0.5
 
+# 9 Displaying final pangenome
+# Run fallowing command on the terminal
+srun --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --partition=base /bin/bash
 
+module load gcc12-env/12.1.0
+module load micromamba/1.4.2
+cd $WORK
+micromamba activate .micromamba/envs/00_anvio/
+
+anvi-display-pan -p /work_beegfs/sunam227/pangenomics/V_jascida_genomes/V_jascida/V_jascida-PAN.db \
+                 -g /work_beegfs/sunam227/pangenomics/V_jascida_genomes/V_jascida-GENOMES.db
+
+
+# Open Another terminal and run the fallowing code
+ssh -L 80??:localhost:80?? sunam???@caucluster.rz.uni-kiel.de
+ssh -L 80??:localhost:80?? n???
+
+# change the "?" according to assigned node and host and run the fallowing
 anvi-display-pan -p Anabea/Anabea-PAN.db \
                     -g Anabaneas-GENOMES.db
 

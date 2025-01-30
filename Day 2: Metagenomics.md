@@ -96,4 +96,4 @@ then using Bandage, contig graph can be visualised
 
 ## Questions
 1- Please submit your generated figure and explain in your own words what you can see (keep it short).
-![image](./resources/graph.png)
+![image](./resources/metagenome_graph.png)

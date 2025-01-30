@@ -39,12 +39,14 @@ metaquast -t 6 -o /work_beegfs/sunam227/metagenomics/0_raw_reads/clean/megahit_o
 
 `MetaQUAST` evaluates various metrics like `N50 Value`, that is a measure of assembly contiguity. A higher N50 value indicates a more contiguous assembly, which is particularly important in metagenomics as it reflects better resolution of genomic regions and fewer fragmented contigs.
 
-### Questions
+## Questions
 1. What is your N50 value? Why is this value relevant?
+
 2. How many contigs are assembled?
-- 54812
+   - 54812 contigs are assembled
+
 3. What is the total length of the contigs?
-- 140329960
+   - 14.0329.960 base pairs
 
 
 
@@ -182,7 +184,7 @@ anvi-summarize -p ./mergedprof/PROFILE.db -c contigs.db -o SUMMARY_MAXBIN2 -C MA
 
 
 ## Questions
-1- Number of ins you got from MetaBAT2 and MaxBin2?
+1- Number of Archeal bins you got from MetaBAT2 and MaxBin2?
 - In the summary we can see that number of Archeal bin we got is 3 for Metabat2 and 0 for Maxbin2.
 
 ## MAGs Quality Estimation
@@ -216,8 +218,8 @@ The quality of each bin was assessed based on:
 This step ensures that the MAGs are of sufficient quality to proceed with downstream analyses, such as functional annotation, metabolic reconstruction, and phylogenetic classification.
 
 ## Questions
-1- Which binning strategy gives you the best quality for the Archeal bins?
-- MetaBAT2
+1. Which binning strategy gives you the best quality for the Archeal bins?
+   - MetaBAT2
 
-2- How many Archeal bins do you get that are of High Quality? How many Bacterial bins do you get that are of High Quality?
-- 0 Archeal bins in high-quality, 13 Bacterial bins with high-quality
+2. How many Archeal bins do you get that are of High Quality? How many Bacterial bins do you get that are of High Quality?
+   - 0 Archeal bins in high-quality, 13 Bacterial bins with high-quality

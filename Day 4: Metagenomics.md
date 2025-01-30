@@ -113,11 +113,11 @@ A bin with a high CSS score and significant redundancy likely requires manual re
 1. Do you get Archea bins that are chimeric? hint: look at the CSS score (explained in the lecture) and the column PASS GUNC in the tables outputs per bin in your gunc_output folder.
 
 ### METABAT__8
-![image](./resources/Contigs_8.png)
+![image](./resources/metagenome_Contigs_8.png)
 ### METABAT__10
-![image](./resources/Contigs_10.png)
+![image](./resources/metagenome_Contigs_10.png)
 ### METABAT_36
-![image](./resources/Contigs_36.png)
+![image](./resources/metagenome_Contigs_36.png)
 
 ## Manual Refinment of Bins
 
@@ -129,5 +129,5 @@ Bins can manually refined by:
 3. Evaluating taxonomy: Taxonomic assignments were cross-checked to ensure that all contigs in a bin were taxonomically consistent. Contigs with mismatched taxonomy can flagged for removal.
 
 ## Questions
-1- Does the quality of your Archea improved?
-- No, they remain the same. There might be a problem occured during bin refinement.
+1. Does the quality of your Archea improved?
+   - No, they remain the same. There might be a problem occured during bin refinement.

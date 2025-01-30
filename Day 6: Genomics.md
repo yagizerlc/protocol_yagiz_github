@@ -159,7 +159,12 @@ Here we obtained the fallowing statistics:
 2. Quality Score Distribution
 3. Overall Yield of Sequencing Data
 
-![image]
+### Read Quality vs. Read Lenght for Raw Long Reads
+![image](/resources/genomics%20long%20reads%20raw%20nanoplot/plot.png)
+
+### Read Lenght Distribution for Raw Long Reads
+![image](/resources/genomics%20long%20reads%20raw%20nanoplot/lenght_dist.png)
+
 
 Next I used <code style="color : lightskyblue">Filtlong</code> to clean and filter the long reads. <code style="color : lightskyblue">Filtlong</code> was used to retain high quality base calling data based on phred score, filter out reads that are too short, and ensure the most informative and relaible reads were kept for downstreem analysis.
 
@@ -182,7 +187,11 @@ NanoPlot --fastq ./clean_reads/*.gz \
  --N50 --dpi 300 --store --raw --tsv_stats --info_in_report
 ```
 
-![image]
+### Read Quality vs. Read Lenght for Processed Long Reads
+![image](/resources/genomics%20clean%20long%20reads%20nanoplot/plot.png)
+
+### Lenght Distribution for Processed Long Reads
+![image](/resources/genomics%20clean%20long%20reads%20nanoplot/lenghtdist.png)
 
 
 ## Genome Assembly
@@ -206,8 +215,6 @@ Post-assembly construction, quality of the assembly should be evaluated. For thi
 4. Genome Coverage
 
 ```bash
-cd $WORK
-
 # Quast
 micromamba activate .micromamba/envs/04_quast
 cd $WORK/genomics
@@ -236,8 +243,7 @@ checkm qa ./assembly_quality/checkm/lineage.ms ./assembly_quality/checkm/ -o 2 >
 micromamba deactivate
 
 
-# Checkm2
-cd $WORK
+# CheckM2
 micromamba activate .micromamba/envs/04_checkm2
 cd $WORK/genomics/hybrid_assembly
 mkdir -p ./assembly_quality/checkm2
@@ -247,12 +253,7 @@ micromamba deactivate
 
 To visualise genome assembly, I used <code style="color : lightskyblue">Bandage</code>. <code style="color : lightskyblue">Bandage</code> generates a graphical representation of the assembly, which allows us to inspect the assembly graph for unresolved regions like repeats or structural variants, identify circularised contigs often corresponds to plasmids or repeats, and confirm that the assembly graph was well-resolved and did not contain any excessive fragmentation.
 
-
-
-
-### !!!ASSEMBLY IMAGE!!!
-
-
+![image](/resources/genomics_graphdepth.png)
 
 
 ### Gene Annotation
@@ -261,7 +262,6 @@ I used <code style="color : lightskyblue">Prokka</code> to perform gene annotati
 
 ```bash
 # Gene Annotation
-cd $WORK
 micromamba activate .micromamba/envs/05_prokka
 cd $WORK/genomics/hybrid_assembly
 prokka ./assembly.fasta --outdir $WORK/genomics/annotated_genome --kingdom Bacteria --addgenes --cpus 32
@@ -275,7 +275,6 @@ To classify the assembled genome, I used <code style="color : lightskyblue">GTDB
 
 ```bash
 # Classification
-cd $WORK
 micromamba activate .micromamba/envs/06_gtdbtk
 conda env config vars set GTDBTK_DATA_PATH="$WORK/databases/gtdbtk/release220";
 micromamba activate .micromamba/envs/06_gtdbtk
@@ -292,7 +291,6 @@ Finally I used <code style="color : lightskyblue">MultiQC</code> to integrate al
 
 ```bash
 # Merging Reports
-cd $WORK
 micromamba activate .micromamba/envs/01_short_reads_qc
 multiqc -d $WORK/genomics/ -o $WORK/genomics/multiqc
 
@@ -302,8 +300,11 @@ module purge
 jobinfo
 ```
 
-5. How good is the quality of genome?
+5. How good is the quality of genome? (check quast, checkM and M2)
 4. Why did we use Hybrid assembler?
+   - We used hybrid assembler (unicycler) because it can integrate both short reads and long reads to generate high-quality assembly. Using both short and long reads with hybrid asemblers is improve the accuracy and contiguity of the constructed genome assembly.
 3. What is the difference between short and long reads?
+   - Short reads are high-throughput DNA sequences range from 50 base pairs to 300 base pairs. Short reads have high accuracy and high sequencing depth, but have struggles with long repeats and structural variations. On the other hand, long reads are DNA sequences that can reach to thousand or even more base pairs. Long reads have lower accuracy and lower sequencing depth, but can deal with long repeat regions.
 2. Did we use Single or Paired end reads? Why?
-1. Write down about the classification of genome we have used here
+   - We used paired-end reads since we get sequence data from both directions, it helps correct sequencing errors and provide improved accuracy in assembly.
+1. Write down about the classification of genome we have used here (check Average nucleotide identity ANI in the GTDB outputs if higher than 95% its true)
