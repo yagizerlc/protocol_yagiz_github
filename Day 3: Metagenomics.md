@@ -172,7 +172,7 @@ anvi-cluster-contigs -p ./mergedprof/PROFILE.db -c contigs.db -C METABAT2 --driv
 anvi-summarize -p ./mergedprof/PROFILE.db -c contigs.db -o SUMMARY_METABAT2 -C METABAT2
 ```
 
-### !!!PUT METABAT RESULT!!!
+![image](/resources/Metabat%20archea%20bins%20before.png)
 
 ```bash
 # binning with MaxBin2
