@@ -41,7 +41,6 @@ for file in /work_beegfs/sunam227/metagenomics/0_raw_reads/*.gz; do
     fastqc "${file}" -o /work_beegfs/sunam227/metagenomics/0_raw_reads/quality_reads
 done
 ```
-### !!! PUT QUALITY CHECK RESULTS HERE!!!
 
 
 Then I used `fastp` to process the raw reads. This cleaning process involves:

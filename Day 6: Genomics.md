@@ -301,6 +301,7 @@ jobinfo
 ```
 
 5. How good is the quality of genome? (check quast, checkM and M2)
+N50 4332314, checkM: completeness %98.88 ontamination 0.19. M2 completeness 99.98 contamination 0.29
 4. Why did we use Hybrid assembler?
    - We used hybrid assembler (unicycler) because it can integrate both short reads and long reads to generate high-quality assembly. Using both short and long reads with hybrid asemblers is improve the accuracy and contiguity of the constructed genome assembly.
 3. What is the difference between short and long reads?
