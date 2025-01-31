@@ -200,7 +200,6 @@ srun --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --partition=
 
 module load gcc12-env/12.1.0
 module load micromamba/1.4.2
-cd $WORK
 micromamba activate .micromamba/envs/00_anvio/
 
 anvi-display-pan -p /work_beegfs/sunam227/pangenomics/V_jascida_genomes/V_jascida/V_jascida-PAN.db \
@@ -211,6 +210,9 @@ anvi-display-pan -p /work_beegfs/sunam227/pangenomics/V_jascida_genomes/V_jascid
 ssh -L 8060:localhost:8080 sunam227@caucluster.rz.uni-kiel.de
 ssh -L 8080:localhost:8080 n100 # n100 and localhost should be changed according to assigned node and host
 ```
+
+![image](resources/pangenome_V_jascida.png)
+
 
 Now let's perform another pangenome analysis by using another species. In the fallowing part we will run the script as it is instead of one by one. Now let's check our data.
 
@@ -356,8 +358,7 @@ srun --pty --mem=10G --nodes=1 --tasks-per-node=1 --cpus-per-task=1 --partition=
 
 module load gcc12-env/12.1.0
 module load micromamba/1.4.2
-cd $WORK
-micromamba activate .micromamba/envs/00_anvio/
+micromamba activate 00_anvio
 
 anvi-display-pan -p /work_beegfs/sunam227/pangenomics/V_jascida_genomes/V_jascida/V_jascida-PAN.db \
                  -g /work_beegfs/sunam227/pangenomics/V_jascida_genomes/V_jascida-GENOMES.db
@@ -368,8 +369,8 @@ ssh -L 80??:localhost:80?? sunam???@caucluster.rz.uni-kiel.de
 ssh -L 80??:localhost:80?? n???
 
 # change the "?" according to assigned node and host and run the fallowing
-anvi-display-pan -p Anabea/Anabea-PAN.db \
-                    -g Anabaneas-GENOMES.db
+anvi-display-pan -p ./sequences/Anabea/Anabea-PAN.db \
+                    -g ./sequences/Anabanea-GENOMES.db
 
 #micromamba activate .micromamba/envs/00_anvio/
 
@@ -378,5 +379,6 @@ module purge
 jobinfo
 ```
 
+![image](/resources/anabaena_pangenome.png)
 
 http://0.0.0.0:8082
